@@ -10,7 +10,7 @@ orbs:
 jobs:
   unittest:
     docker:
-      - image: cimg/node:18.14.2
+      - image: cimg/node:19.7.0
     steps:
       - checkout
       - node/install-packages
