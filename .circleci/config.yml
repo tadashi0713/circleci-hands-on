@@ -31,9 +31,5 @@ jobs:
 workflows:
   say-hello-workflow:
     jobs:
-      - say-hello:
-          filters:
-            branches:
-              only:
-                - master
+      - say-hello
       - unittest
