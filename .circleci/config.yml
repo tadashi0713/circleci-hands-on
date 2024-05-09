@@ -1,39 +1,55 @@
-# Use the latest 2.1 version of CircleCI pipeline process engine.
-# See: https://circleci.com/docs/2.0/configuration-reference
+# This config was automatically generated from your source code
+# Stacks detected: deps:node:.
 version: 2.1
-
 orbs:
-  node: circleci/node@5.1.0
-
-# Define a job to be invoked later in a workflow.
-# See: https://circleci.com/docs/2.0/configuration-reference/#jobs
+  node: circleci/node@5
 jobs:
-  say-hello:
-    # Specify the execution environment. You can specify an image from Dockerhub or use one of our Convenience Images from CircleCI's Developer Hub.
-    # See: https://circleci.com/docs/2.0/configuration-reference/#docker-machine-macos-windows-executor
+  test-node:
+    # Install node dependencies and run tests
+    executor: node/default
+    steps:
+      - checkout
+      - node/install-packages:
+          pkg-manager: npm
+      - run:
+          name: Run tests
+          command: npm run test:ci
+  build-node:
+    # Build node project
+    executor: node/default
+    steps:
+      - checkout
+      - node/install-packages:
+          pkg-manager: npm
+      - run:
+          command: npm run build
+      - run:
+          name: Create the ~/artifacts directory if it doesn't exist
+          command: mkdir -p ~/artifacts
+      # Copy output to artifacts dir
+      - run:
+          name: Copy artifacts
+          command: cp -R build dist public .output .next .docusaurus ~/artifacts 2>/dev/null || true
+      - store_artifacts:
+          path: ~/artifacts
+          destination: node-build
+  deploy:
+    # This is an example deploy job, not actually used by the workflow
     docker:
       - image: cimg/base:stable
-    # Add steps to the job
-    # See: https://circleci.com/docs/2.0/configuration-reference/#steps
     steps:
-      - checkout
+      # Replace this with steps to deploy to users
       - run:
-          name: "Say hello"
-          command: "echo Hello, World!"
-  
-  unittest:
-    docker:
-      - image: cimg/node:18.14.0
-    steps:
-      - checkout
-      - node/install-packages
-      - run: npm run test:ci
-
-# Invoke jobs via workflows
-# See: https://circleci.com/docs/2.0/configuration-reference/#workflows
+          name: deploy
+          command: '#e.g. ./deploy.sh'
 workflows:
-  say-hello-workflow:
+  build-and-test:
     jobs:
-      - say-hello
-      - unittest
-      - node/test
+      - test-node
+      - build-node:
+          requires:
+            - test-node
+    # - deploy:
+    #     requires:
+    #       - build-node
+  
